@@ -16,8 +16,8 @@ cur = conn.cursor()
 
 @app.route('/getLoggedUserId', methods=['GET'])
 def getLoggedUserId():
-    user_email = request.headers.get('Authorization')
-    cur.execute('SELECT id FROM users WHERE email=%s', (user_email,))
+    userEmail = request.headers.get('Authorization')
+    cur.execute('SELECT id FROM users WHERE email=%s', (userEmail,))
     result = cur.fetchone()
     
     if result is not None:
