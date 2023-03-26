@@ -46,13 +46,13 @@ def auth():
         return jsonify({'message': 'Incorrect user or password'}), 401
 
 @app.route('/getLoggedUserId', methods=['GET'])
-def getLoggedUserId():
+def getLoggedUserId(token):
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token)
 
     if decoded_token is not None:
         user_id = decoded_token['user_id']
-        return jsonify({'user_id': user_id}), 200
+        return  jsonify({'user_id':user_id}), 200
     else:
         return jsonify({'error': 'Invalid token'}), 401
     
@@ -74,14 +74,20 @@ def register():
 
     return jsonify({'message': 'Account added'})
 
-@app.route('/users/myTasks/<int:user_id>/<int:task_id>', methods=['GET'])
-def readTasks(user_id,task_id):       
-    user_id = getLoggedUserId()
-    cur.execute('SELECT * FROM tasks WHERE task_id=%s AND user_id=%s', (task_id,user_id,))
+@app.route('/users/myTasks/<user_id>', methods=['GET'])
+def readTasks(user_id): 
+    token=request.headers.get('Authorization')
+    try:
+        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256']) 
+        token = decoded_token['user_id'] 
+    except jwt.exceptions.DecodeError:
+        return jsonify({'error': 'Invalid token'}), 401
+           
+    cur.execute('SELECT tasks.task_id, tasks.title, tasks.description, tasks.is_done FROM tasks INNER JOIN users ON tasks.user_id = users.user_id WHERE users.user_id = %s',user_id)
     tasks = cur.fetchall()
     return jsonify(tasks)
 
-@app.route('/users/myTasks/<int:user_id>', methods=['POST'])
+@app.route('/users/myTasks/<user_id>', methods=['POST'])
 def createTask(user_id):
     user_id = request.headers.get('Authorization') 
     try:
@@ -98,7 +104,7 @@ def createTask(user_id):
 
     return jsonify({'message': 'Task created successfully'})
 
-@app.route('/users/myTasks/<int:user_id>', methods=['PUT'])
+@app.route('/users/myTasks/<user_id>', methods=['PUT'])
 def update_task(task_id):
     user_id = getLoggedUserId()
     
@@ -116,11 +122,11 @@ def update_task(task_id):
 
     return jsonify({'message': 'Task updated'})
 
-@app.route('/users/myTasks/<int:user_id>', methods=['DELETE'])
-def delete_task(task_id):
+@app.route('/users/myTasks/<int:user_id>/<task_id>', methods=['DELETE'])
+def delete_task(user_id,task_id):
     user_id = getLoggedUserId()
     
-    cur.execute('SELECT * FROM tasks WHERE id=%s AND user_id=%s', (task_id, user_id))
+    cur.execute('SELECT * FROM tasks WHERE user_id=%s  task_id=%s', (user_id,task_id))
     task = cur.fetchone()
     if task is None:
         return jsonify({'error': 'Task not found or does not belong to logged user'})
