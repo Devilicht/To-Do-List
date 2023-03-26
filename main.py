@@ -19,7 +19,7 @@ cur = conn.cursor()
 app.config['SECRET_KEY'] = 'mySecretKey'
 
 def generate_token(user_id):
-    payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(minutes=30)}
+    payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(hours=24)}
     token = jwt.encode(payload, app.config['SECRET_KEY'])
     return token
 
@@ -87,7 +87,7 @@ def readTasks(user_id):
     tasks = cur.fetchall()
     return jsonify(tasks)
 
-@app.route('/users/<user_id>/tasks/<task_id>', methods=['POST'])
+@app.route('/users/<user_id>/tasks', methods=['POST'])
 def createTask(user_id):
     user_id = request.headers.get('Authorization') 
     try:
@@ -97,7 +97,7 @@ def createTask(user_id):
         return jsonify({'error': 'Invalid token'}), 401
     
     title = request.json['title']
-    description = request.json.get('description','')
+    description = request.json['description']
     
     cur.execute('INSERT INTO tasks (title, description, user_id) VALUES (%s, %s, %s)', (title, description, user_id))
     conn.commit()
@@ -133,16 +133,21 @@ def updateTitleAndDescription(user_id, task_id):
         conn.commit()
     return jsonify({'message': 'Task updated'})
 
-@app.route('/users/<user_id>/tasks/<tasks_id>', methods=['DELETE'])
+@app.route('/users/<user_id>/tasks/<task_id>', methods=['DELETE'])
 def delete_task(user_id,task_id):
-    user_id = getLoggedUserId()
+    token=request.headers.get('Authorization')
+    try:
+        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256']) 
+        token = decoded_token['user_id'] 
+    except jwt.exceptions.DecodeError:
+        return jsonify({'error': 'Invalid token'}), 401 
     
-    cur.execute('SELECT * FROM tasks WHERE user_id=%s  task_id=%s', (user_id,task_id))
+    cur.execute('SELECT * FROM tasks WHERE task_id=%s AND user_id=%s', (task_id, user_id))
     task = cur.fetchone()
     if task is None:
         return jsonify({'error': 'Task not found or does not belong to logged user'})
 
-    cur.execute('DELETE FROM tasks WHERE id=%s', (task_id,))
+    cur.execute('DELETE FROM tasks WHERE task_id=%s', (task_id,))
     conn.commit()
 
     return jsonify({'message': 'Task deleted successfully'})
