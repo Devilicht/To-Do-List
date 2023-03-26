@@ -1,7 +1,6 @@
 from flask import Flask,request,jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
-import os 
 from datetime import datetime
 
 app = Flask(__name__)
