@@ -104,8 +104,8 @@ def createTask(user_id):
 
     return jsonify({'message': 'Task created successfully'})
 
-@app.route('/users/<user_id>/tasks/<tasks_id>', methods=['PUT'])
-def update_title_and_description(user_id, task_id):
+@app.route('/users/<user_id>/tasks/<task_id>', methods=['PUT'])
+def updateTitleAndDescription(user_id, task_id):
     token=request.headers.get('Authorization')
     try:
         decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256']) 
@@ -113,23 +113,23 @@ def update_title_and_description(user_id, task_id):
     except jwt.exceptions.DecodeError:
         return jsonify({'error': 'Invalid token'}), 401    
     
-    cur.execute('SELECT task_id FROM tasks WHERE task_id=%s AND user_id=%s', (task_id, user_id))
+    cur.execute('SELECT * FROM tasks WHERE task_id=%s AND user_id=%s', (task_id, user_id))
     task = cur.fetchone()
     if task is None:
         return jsonify({'error': 'Task not found or does not belong to logged user'})
     title = request.json.get('title',)
     description = request.json.get('description',)
     if title == None and description == None:
-        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE tasks_id=%s', (task[1], task[2], task_id))
+        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE task_id=%s', (task[1], task[2], task_id))
         conn.commit()
     elif title == None and description != None:
-        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE tasks_id=%s', (task[1], description, task_id))
+        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE task_id=%s', (task[1], description, task_id))
         conn.commit()
     elif title != None and description == None:
-        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE tasks_id=%s', (title, task[2], task_id))
+        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE task_id=%s', (title, task[2], task_id))
         conn.commit()
     else:
-        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE tasks_id=%s', (title, description, task_id))
+        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE task_id=%s', (title, description, task_id))
         conn.commit()
     return jsonify({'message': 'Task updated'})
 
