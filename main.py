@@ -15,7 +15,7 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 @app.route('/getLoggedUserId', methods=['GET'])
-def getLoggedUserId():
+async def getLoggedUserId():
     userEmail = request.headers.get('Authorization')
     cur.execute('SELECT id FROM users WHERE email=%s', (userEmail,))
     result = cur.fetchone()
@@ -27,7 +27,7 @@ def getLoggedUserId():
 
 
 @app.route('/users', methods = ['POST'])
-def users():
+async def users():
     email= request.json['email']
     password = request.json['password']
 
@@ -43,7 +43,7 @@ def users():
     
 
 @app.route('/users/register', methods =['POST']) 
-def register():
+async def register():
     name = request.json['name']
     email = request.json['email']
     password = request.json['password']
@@ -61,7 +61,7 @@ def register():
 
 
 @app.route('/users/myTasks', methods=['POST'])
-def createTask():
+async def createTask():
     user_id = getLoggedUserId()
     
     title = request.json['title']
@@ -75,7 +75,7 @@ def createTask():
 
 
 @app.route('/users/int:user_id/myTasks', methods=['GET'])
-def readTasks():       
+async def readTasks():       
     user_id = getLoggedUserId()
     cur.execute('SELECT * FROM tasks WHERE user_id=%s', (user_id,))
     tasks = cur.fetchall()
@@ -83,7 +83,7 @@ def readTasks():
 
 
 @app.route('/users/myTasks/<int:task_id>', methods=['PUT'])
-def update_task(task_id):
+async def update_task(task_id):
     user_id = getLoggedUserId()
     
     cur.execute('SELECT * FROM tasks WHERE id=%s AND user_id=%s', (task_id, user_id))
@@ -101,7 +101,7 @@ def update_task(task_id):
     return jsonify({'message': 'Task updated'})
 
 @app.route('/users/myTasks/<int:task_id>', methods=['DELETE'])
-def delete_task(task_id):
+async def delete_task(task_id):
     user_id = getLoggedUserId()
     
     cur.execute('SELECT * FROM tasks WHERE id=%s AND user_id=%s', (task_id, user_id))
