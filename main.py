@@ -24,7 +24,7 @@ def getLoggedUserId():
     if result is not None:
         return jsonify({'user_id': result[0]}), 200
     else:
-        return jsonify({'error': 'Usuário não autenticado.'}), 401
+        return jsonify({'error': 'Unauthenticated user.'}), 401
 
 
 @app.route('/users', methods = ['POST'])
