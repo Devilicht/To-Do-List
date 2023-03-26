@@ -4,7 +4,7 @@ Esta é um API simples para registro de usuários e gerenciamento de tarefas usa
 
 # A API usa as seguintes tecnologias e conceitos:
 
--Flask: um framework web Python usado para construir aplicativos web.
+-Flask: um framework web Python usado para construir uma aplicação web.
 
 -psycopg2: um adaptador PostgreSQL para a linguagem de programação Python.
 
