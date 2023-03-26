@@ -2,7 +2,7 @@
 
 Esta é um API simples para registro de usuários e gerenciamento de tarefas usando Flask e PostgreSQL pelo Docker. Ele inclui rotas para registro de usuário, autenticação, obtenção do ID do usuário logado, leitura, criação, atualização e exclusão de tarefas. A API usa tokens JWT para autenticação e autorização do usuário.
 
-A API usa as seguintes tecnologias e conceitos:
+# A API usa as seguintes tecnologias e conceitos:
 
 -Flask: um framework web Python usado para construir aplicativos web.
 
@@ -12,7 +12,7 @@ A API usa as seguintes tecnologias e conceitos:
 
 -werkzeug.security: uma biblioteca usada para hashing e verificação de senhas.
 
-A API possui as seguintes rotas:
+# A API possui as seguintes rotas:
 
 -/register: uma rota para registro de usuário.
 
