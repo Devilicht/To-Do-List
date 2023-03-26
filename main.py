@@ -45,7 +45,7 @@ def auth():
     else:
         return jsonify({'message': 'Incorrect user or password'}), 401
 
-@app.route('/me', methods=['GET'])
+@app.route('/getLoggedUserId', methods=['GET'])
 def getLoggedUserId(token):
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token)
