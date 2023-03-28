@@ -3,23 +3,26 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
 from datetime import datetime,timedelta
 import jwt
- 
+import os
+from dotenv import load_dotenv 
 
+
+load_dotenv()
 app = Flask(__name__)
 
 conn = psycopg2.connect(
     host='localhost',
     port=5432,
-    dbname='tasks_db',
-    user='postgres',
-    password='3030'
+    dbname=os.getenv('POSTGRES_DB'),
+    user=os.getenv('POSTGRES_USER'),
+    password= os.getenv('POSTGRES_PASSWORD')
 )
 cur = conn.cursor()
 
 app.config['SECRET_KEY'] = 'mySecretKey'
 
 def generate_token(user_id):
-    payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(hours=24)}
+    payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(minutes=1)}
     token = jwt.encode(payload, app.config['SECRET_KEY'])
     return token
 
@@ -46,7 +49,7 @@ def auth():
         return jsonify({'message': 'Incorrect user or password'}), 401
 
 @app.route('/getLoggedUserId', methods=['GET'])
-def getLoggedUserId(token):
+def getLoggedUserId():
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token)
 
@@ -65,8 +68,9 @@ def register():
     confirm_password = request.json['confirm_password']
 
     if password != confirm_password:
-        return jsonify({'message': 'Passwords do not match'})
-
+        return jsonify({'message': 'Passwords do not match'}),200
+    else:
+        401
     hashed_password = generate_password_hash(password)
 
     cur.execute('INSERT INTO users (name,email, password) VALUES (%s,%s,%s)', (name, email, hashed_password))
@@ -76,42 +80,29 @@ def register():
 
 @app.route('/users/<user_id>/tasks', methods=['GET'])
 def readTasks(user_id): 
-    token=request.headers.get('Authorization')
-    try:
-        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256']) 
-        token = decoded_token['user_id'] 
-    except jwt.exceptions.DecodeError:
-        return jsonify({'error': 'Invalid token'}), 401
-           
+    getLoggedUserId()
+          
     cur.execute('SELECT tasks.task_id, tasks.title, tasks.description, tasks.is_done FROM tasks INNER JOIN users ON tasks.user_id = users.user_id WHERE users.user_id = %s',user_id)
     tasks = cur.fetchall()
     return jsonify(tasks)
 
 @app.route('/users/<user_id>/tasks', methods=['POST'])
 def createTask(user_id):
-    user_id = request.headers.get('Authorization') 
-    try:
-        decoded_token = jwt.decode(user_id, app.config['SECRET_KEY'], algorithms=['HS256']) 
-        user_id = decoded_token['user_id'] 
-    except jwt.exceptions.DecodeError:
-        return jsonify({'error': 'Invalid token'}), 401
+    getLoggedUserId()
     
     title = request.json['title']
     description = request.json['description']
-    
+    #try:
     cur.execute('INSERT INTO tasks (title, description, user_id) VALUES (%s, %s, %s)', (title, description, user_id))
     conn.commit()
-
+        
     return jsonify({'message': 'Task created successfully'})
+    #except KeyError:
+       # 401
 
 @app.route('/users/<user_id>/tasks/<task_id>', methods=['PUT'])
 def updateTitleAndDescription(user_id, task_id):
-    token=request.headers.get('Authorization')
-    try:
-        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256']) 
-        token = decoded_token['user_id'] 
-    except jwt.exceptions.DecodeError:
-        return jsonify({'error': 'Invalid token'}), 401    
+    getLoggedUserId()
     
     cur.execute('SELECT * FROM tasks WHERE task_id=%s AND user_id=%s', (task_id, user_id))
     task = cur.fetchone()
@@ -135,12 +126,7 @@ def updateTitleAndDescription(user_id, task_id):
 
 @app.route('/users/<user_id>/tasks/<task_id>', methods=['DELETE'])
 def delete_task(user_id,task_id):
-    token=request.headers.get('Authorization')
-    try:
-        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256']) 
-        token = decoded_token['user_id'] 
-    except jwt.exceptions.DecodeError:
-        return jsonify({'error': 'Invalid token'}), 401 
+    getLoggedUserId() 
     
     cur.execute('SELECT * FROM tasks WHERE task_id=%s AND user_id=%s', (task_id, user_id))
     task = cur.fetchone()
