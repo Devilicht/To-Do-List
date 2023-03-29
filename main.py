@@ -6,7 +6,6 @@ from database.repository import UserRepository
 from utils.randomToken import generatorKeyToken
 from auth.authentication import generate_token,decode_token
 
-
 load_dotenv()
 
 app = Flask(__name__)
