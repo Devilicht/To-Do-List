@@ -70,8 +70,7 @@ def createTask(user_id):
     getLoggedUserId()
     
     title = request.json['title']
-    description = request.json['description']
-    deadline = request.json['deadline']                             
+    description = request.json['description']                             
 
     try:
         userRepository.generateTask(title=title, description=description, user_id=user_id)
