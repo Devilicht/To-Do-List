@@ -1,13 +1,11 @@
 from flask import Flask,request,jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from datetime import datetime,timedelta
-import jwt
-
 from dotenv import load_dotenv 
 from database.repository import UserRepository
-
 from utils.randomToken import generatorKeyToken
+from auth.authentication import generate_token,decode_token
+
 
 load_dotenv()
 
@@ -15,18 +13,7 @@ app = Flask(__name__)
 
 userRepository = UserRepository()
 app.config['SECRET_KEY'] = generatorKeyToken() 
-
-def generate_token(user_id):
-    payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(minutes=60)}
-    token = jwt.encode(payload, app.config['SECRET_KEY'])
-    return token
-
-def decode_token(token):
-    try:
-        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-        return decoded_token
-    except jwt.exceptions.DecodeError:
-        return None
+key = app.config['SECRET_KEY']
 
 @app.route('/users', methods=['POST'])
 def auth():
@@ -35,7 +22,7 @@ def auth():
 
     result = userRepository.findUserByEmail(email=email)
     if result is not None and check_password_hash(result[1], password):
-        token= generate_token(result[0])
+        token= generate_token(result[0], key)
         return jsonify({'message': 'Successful login!', 'token': token}), 200
     else:
         return jsonify({'message': 'Incorrect user or password'}), 401
@@ -43,7 +30,7 @@ def auth():
 @app.route('/getLoggedUserId', methods=['GET'])
 def getLoggedUserId():
     token = request.headers.get('Authorization')
-    decoded_token = decode_token(token)
+    decoded_token = decode_token(token, key)
 
     if decoded_token is not None:
         user_id = decoded_token['user_id']
