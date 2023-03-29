@@ -23,3 +23,20 @@ Esta é um API simples para registro de usuários e gerenciamento de tarefas usa
 -/users/<user_id>/tasks: uma rota para leitura, criação, atualização e exclusão de tarefas. O ID do usuário é passado como parâmetro.
 
 A API permite que os usuários criem uma conta, façam login, criem tarefas, leiam informações sobre tarefas, atualizem informações de tarefas e excluam tarefas. Somente usuários logados podem acessar as rotas de tarefas.
+
+# Configuração Database:
+Em relação a criação da DB foram criadas duas tabelas:
+- CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password VARCHAR(150) NOT NULL
+);
+
+- CREATE TABLE tasks (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    description TEXT NULL,
+    is_done BOOLEAN DEFAULT false,
+    user_id INTEGER REFERENCES users(id)
+);
