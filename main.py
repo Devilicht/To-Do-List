@@ -7,13 +7,14 @@ import jwt
 from dotenv import load_dotenv 
 from database.repository import UserRepository
 
+from utils.randomToken import generatorKeyToken
 
 load_dotenv()
+
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = 'mySecretKey'
-
 userRepository = UserRepository()
+app.config['SECRET_KEY'] = generatorKeyToken() 
 
 def generate_token(user_id):
     payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(minutes=60)}
@@ -83,6 +84,7 @@ def createTask(user_id):
     
     title = request.json['title']
     description = request.json['description']
+    deadline = request.json['deadline']                             
 
     try:
         userRepository.generateTask(title=title, description=description, user_id=user_id)
