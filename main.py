@@ -1,28 +1,22 @@
 from flask import Flask,request,jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-import psycopg2
+
 from datetime import datetime,timedelta
 import jwt
-import os
+
 from dotenv import load_dotenv 
+from database.repository import UserRepository
 
 
 load_dotenv()
 app = Flask(__name__)
 
-conn = psycopg2.connect(
-    host='localhost',
-    port=5432,
-    dbname=os.getenv('POSTGRES_DB'),
-    user=os.getenv('POSTGRES_USER'),
-    password= os.getenv('POSTGRES_PASSWORD')
-)
-cur = conn.cursor()
-
 app.config['SECRET_KEY'] = 'mySecretKey'
 
+userRepository = UserRepository()
+
 def generate_token(user_id):
-    payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(minutes=1)}
+    payload = {'user_id': user_id, 'exp': datetime.utcnow() + timedelta(minutes=60)}
     token = jwt.encode(payload, app.config['SECRET_KEY'])
     return token
 
@@ -38,12 +32,9 @@ def auth():
     email = request.json['email']
     password = request.json['password']
 
-    cur.execute('SELECT user_id, password FROM users WHERE email=%s', (email,))
-    result = cur.fetchone()
-    conn.commit()
-
+    result = userRepository.findUserByEmail(email=email)
     if result is not None and check_password_hash(result[1], password):
-        token = generate_token(result[0])
+        token= generate_token(result[0])
         return jsonify({'message': 'Successful login!', 'token': token}), 200
     else:
         return jsonify({'message': 'Incorrect user or password'}), 401
@@ -73,18 +64,18 @@ def register():
         401
     hashed_password = generate_password_hash(password)
 
-    cur.execute('INSERT INTO users (name,email, password) VALUES (%s,%s,%s)', (name, email, hashed_password))
-    conn.commit()
+    userRepository.saveUser(name=name,email=email,hashed_password=hashed_password)
 
     return jsonify({'message': 'Account added'})
 
 @app.route('/users/<user_id>/tasks', methods=['GET'])
 def readTasks(user_id): 
-    getLoggedUserId()
-          
-    cur.execute('SELECT tasks.task_id, tasks.title, tasks.description, tasks.is_done FROM tasks INNER JOIN users ON tasks.user_id = users.user_id WHERE users.user_id = %s',user_id)
-    tasks = cur.fetchall()
-    return jsonify(tasks)
+    getLoggedUserId()       
+    tasks = userRepository.joinUserTask(user_id=user_id)
+    if tasks != []:      
+        return jsonify(tasks),200
+    else:
+        return jsonify ({"message":"no registered tasks"}),401
 
 @app.route('/users/<user_id>/tasks', methods=['POST'])
 def createTask(user_id):
@@ -92,49 +83,40 @@ def createTask(user_id):
     
     title = request.json['title']
     description = request.json['description']
-    #try:
-    cur.execute('INSERT INTO tasks (title, description, user_id) VALUES (%s, %s, %s)', (title, description, user_id))
-    conn.commit()
+
+    try:
+        userRepository.generateTask(title=title, description=description, user_id=user_id)
         
-    return jsonify({'message': 'Task created successfully'})
-    #except KeyError:
-       # 401
+        return jsonify({'message': 'Task created successfully'})
+    except KeyError:
+        return jsonify({'message' : 'error creating task'}),401
 
 @app.route('/users/<user_id>/tasks/<task_id>', methods=['PUT'])
 def updateTitleAndDescription(user_id, task_id):
     getLoggedUserId()
     
-    cur.execute('SELECT * FROM tasks WHERE task_id=%s AND user_id=%s', (task_id, user_id))
-    task = cur.fetchone()
-    if task is None:
-        return jsonify({'error': 'Task not found or does not belong to logged user'})
     title = request.json.get('title',)
     description = request.json.get('description',)
-    if title == None and description == None:
-        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE task_id=%s', (task[1], task[2], task_id))
-        conn.commit()
-    elif title == None and description != None:
-        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE task_id=%s', (task[1], description, task_id))
-        conn.commit()
-    elif title != None and description == None:
-        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE task_id=%s', (title, task[2], task_id))
-        conn.commit()
-    else:
-        cur.execute('UPDATE tasks SET title=%s, description=%s WHERE task_id=%s', (title, description, task_id))
-        conn.commit()
+
+    task = userRepository.selectTaskById(user_id=user_id, task_id=task_id)
+    
+    if task is None:
+        return jsonify({'error': 'Task not found or does not belong to logged user'})
+    
+    userRepository.updateTask(title=title, description=description, task=task, task_id=task_id)
+    
     return jsonify({'message': 'Task updated'})
+    
 
 @app.route('/users/<user_id>/tasks/<task_id>', methods=['DELETE'])
 def delete_task(user_id,task_id):
     getLoggedUserId() 
     
-    cur.execute('SELECT * FROM tasks WHERE task_id=%s AND user_id=%s', (task_id, user_id))
-    task = cur.fetchone()
+    task = userRepository.selectTaskById(user_id=user_id, task_id=task_id)
     if task is None:
         return jsonify({'error': 'Task not found or does not belong to logged user'})
 
-    cur.execute('DELETE FROM tasks WHERE task_id=%s', (task_id,))
-    conn.commit()
+    userRepository.deleteTask(task_id=task_id)
 
     return jsonify({'message': 'Task deleted successfully'})
 
