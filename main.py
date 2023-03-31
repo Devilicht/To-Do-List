@@ -74,7 +74,7 @@ def readTasks(user_id):
 @app.route('/users/<user_id>/tasks', methods=['POST'])
 def createTask(user_id):
     getLoggedUserId()
-    
+          
     title = request.json['title']
     description = request.json['description']                             
 
