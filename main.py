@@ -36,7 +36,6 @@ def getLoggedUserId():
         return  jsonify({'user_id':user_id}), 200
     else:
         return jsonify({'error': 'Invalid token'}), 401
-    
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -47,20 +46,28 @@ def register():
 
     if password != confirm_password:
         return jsonify({'message': 'Passwords do not match'}),200
-    else:
-        401
+    
     hashed_password = generate_password_hash(password)
 
     userRepository.saveUser(name=name,email=email,hashed_password=hashed_password)
 
-    return jsonify({'message': 'Account added'})
+    return jsonify({'message': 'Account added'}), 200
 
 @app.route('/users/<user_id>/tasks', methods=['GET'])
 def readTasks(user_id): 
     getLoggedUserId()       
     tasks = userRepository.joinUserTask(user_id=user_id)
-    if tasks != []:      
-        return jsonify(tasks),200
+    if tasks != []:     
+        result = []
+        for item in tasks:
+            dic= {}
+            dic['taks_id'] = item[0]
+            dic['title'] = item[1]
+            dic['description'] = item[2]
+            dic['is_done'] = item[3]
+            result.append(dic)
+
+        return jsonify(result),200
     else:
         return jsonify ({"message":"no registered tasks"}),401
 
@@ -106,7 +113,6 @@ def delete_task(user_id,task_id):
     userRepository.deleteTask(task_id=task_id)
 
     return jsonify({'message': 'Task deleted successfully'})
-
 
 
 if __name__=='__main__':
