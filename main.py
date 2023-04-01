@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 userRepository = UserRepository()
 app.config['SECRET_KEY'] = "anytoken"
-key = app.config['SECRET_KEY'] 
+key = app.config['SECRET_KEY']
 
 
 @app.route('/users', methods=['POST'])
@@ -26,12 +26,11 @@ def auth():
         return jsonify({'message': 'Successful login!', 'token': token}), 200
     else:
         return jsonify({'message': 'Incorrect user or password'}), 401
-    
+
 
 @app.route('/getLoggedUserId', methods=['GET'])
 def getLoggedUserId():
     token = request.headers.get('Authorization')
-    
 
     decoded_token = decode_token(token, key)
 
@@ -41,7 +40,6 @@ def getLoggedUserId():
     else:
         return jsonify({'error': 'Invalid token'}), 401
 
-    
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -62,9 +60,12 @@ def register():
 
 
 @app.route('/users/<user_id>/tasks', methods=['GET'])
-@auth_decorator
 def readTasks(user_id):
-    
+    token = request.headers.get('Authorization')
+    decoded_token = decode_token(token, key)
+
+    if decoded_token is not None:
+        getLoggedUserId()
 
     tasks = userRepository.joinUserTask(user_id=user_id)
     if tasks != []:
@@ -83,9 +84,12 @@ def readTasks(user_id):
 
 
 @app.route('/users/<user_id>/tasks', methods=['POST'])
-#@auth_decorator
 def createTask(user_id):
-    getLoggedUserId()
+    token = request.headers.get('Authorization')
+    decoded_token = decode_token(token, key)
+
+    if decoded_token is not None:
+        getLoggedUserId()
 
     title = request.json['title']
     description = request.json['description']
@@ -101,7 +105,11 @@ def createTask(user_id):
 
 @app.route('/users/<user_id>/tasks/<task_id>', methods=['PUT'])
 def updateTitleAndDescription(user_id, task_id):
-    getLoggedUserId()
+    token = request.headers.get('Authorization')
+    decoded_token = decode_token(token, key)
+
+    if decoded_token is not None:
+        getLoggedUserId()
 
     title = request.json.get('title',)
     description = request.json.get('description',)
@@ -119,8 +127,11 @@ def updateTitleAndDescription(user_id, task_id):
 
 @app.route('/users/<user_id>/tasks/<task_id>', methods=['DELETE'])
 def delete_task(user_id, task_id):
-    getLoggedUserId()
+    token = request.headers.get('Authorization')
+    decoded_token = decode_token(token, key)
 
+    if decoded_token is not None:
+        getLoggedUserId()
     task = userRepository.selectTaskById(user_id=user_id, task_id=task_id)
     if task is None:
         return jsonify({'error': 'Task not found or does not belong to logged user'})
