@@ -5,7 +5,7 @@ from os import getenv
 class UserRepository:
     def __init__(self):
         conn = psycopg2.connect(
-            host='localhost',
+            host='localhost' | getenv('HOST_DB') ,
             port=5432,
             dbname=getenv('POSTGRES_DB'),
             user=getenv('POSTGRES_USER'),
