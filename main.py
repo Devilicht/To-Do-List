@@ -5,23 +5,25 @@ from dotenv import load_dotenv
 from database.repository import UserRepository
 from utils.randomToken import generatorKeyToken
 from auth.authentication import generate_token, decode_token
-from auth.authDecorator import auth_decorator
+
+
 load_dotenv()
 
 app = Flask(__name__)
 
 userRepository = UserRepository()
-app.config['SECRET_KEY'] = "anytoken"
+app.config['SECRET_KEY'] = generatorKeyToken()
 key = app.config['SECRET_KEY']
 
 
 @app.route('/users', methods=['POST'])
-def auth():
+def autht():
     email = request.json['email']
     password = request.json['password']
 
     result = userRepository.findUserByEmail(email=email)
     if result is not None and check_password_hash(result[1], password):
+        global token
         token = generate_token(result[0], key)
         return jsonify({'message': 'Successful login!', 'token': token}), 200
     else:
@@ -64,9 +66,9 @@ def readTasks(user_id):
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token, key)
 
-    if decoded_token is not None:
-        getLoggedUserId()
-
+    if decoded_token == None:
+        return {"message": "don't authorization"}, 401
+    
     tasks = userRepository.joinUserTask(user_id=user_id)
     if tasks != []:
         result = []
@@ -88,8 +90,8 @@ def createTask(user_id):
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token, key)
 
-    if decoded_token is not None:
-        getLoggedUserId()
+    if decoded_token == None:
+        return {"message": "don't authorization"}, 401
 
     title = request.json['title']
     description = request.json['description']
@@ -108,8 +110,8 @@ def updateTitleAndDescription(user_id, task_id):
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token, key)
 
-    if decoded_token is not None:
-        getLoggedUserId()
+    if decoded_token == None:
+        return {"message": "don't authorization"}, 401
 
     title = request.json.get('title',)
     description = request.json.get('description',)
@@ -130,8 +132,9 @@ def delete_task(user_id, task_id):
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token, key)
 
-    if decoded_token is not None:
-        getLoggedUserId()
+    if decoded_token == None:
+        return {"message": "don't authorization"}, 401
+    
     task = userRepository.selectTaskById(user_id=user_id, task_id=task_id)
     if task is None:
         return jsonify({'error': 'Task not found or does not belong to logged user'})
