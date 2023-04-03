@@ -1,11 +1,10 @@
-
-FROM python:3.11.2
+FROM python:3.11.2-alpine3.17
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY requirements.txt /app/
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 COPY main.py /app/  
 
@@ -21,8 +20,6 @@ ENV POSTGRES_DB=${POSTGRES_DB}
 
 ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
-ENV HOST_DB=${HOST_DB} 
-
 EXPOSE 5000
 
-CMD ["python", "./main.py"]
+CMD ["python", "main.py"]
