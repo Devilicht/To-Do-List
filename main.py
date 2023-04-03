@@ -68,17 +68,11 @@ def readTasks(user_id):
 
     if decoded_token == None:
         return {"message": "don't authorization"}, 401
-    
+
     tasks = userRepository.joinUserTask(user_id=user_id)
     if tasks != []:
-        result = []
-        for item in tasks:
-            dic = {}
-            dic['taks_id'] = item[0]
-            dic['title'] = item[1]
-            dic['description'] = item[2]
-            dic['is_done'] = item[3]
-            result.append(dic)
+        result = [{'taks_id': item[0], 'title': item[1],
+                   'description': item[2], 'is_done': item[3]} for item in tasks]
 
         return jsonify(result), 200
     else:
@@ -134,7 +128,7 @@ def delete_task(user_id, task_id):
 
     if decoded_token == None:
         return {"message": "don't authorization"}, 401
-    
+
     task = userRepository.selectTaskById(user_id=user_id, task_id=task_id)
     if task is None:
         return jsonify({'error': 'Task not found or does not belong to logged user'})
