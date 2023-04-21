@@ -1,6 +1,6 @@
-# To-do-list é uma API REST- Flask:
+# To-do-list:
 
-Esta é um API simples para registro de usuários e gerenciamento de tarefas usando Flask e PostgreSQL pelo Docker. Ele inclui rotas para registro de usuário, autenticação, obtenção do ID do usuário logado, leitura, criação, atualização e exclusão de tarefas. A API usa tokens JWT para autenticação e autorização do usuário.
+Esta é um API REST simples para registro de usuários e gerenciamento de tarefas usando Flask e PostgreSQL pelo Docker. Ele inclui rotas para registro de usuário, autenticação, obtenção do ID do usuário logado, leitura, criação, atualização e exclusão de tarefas. A API usa tokens JWT para autenticação e autorização do usuário.
 
 ## A API usa as seguintes tecnologias e conceitos:
 
