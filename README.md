@@ -16,7 +16,7 @@ Esta é um API REST simples para registro de usuários e gerenciamento de tarefa
 
 Será criar um arquivo ".env" e definir as variaveis, em seguida "subir" o conteiner no docker, assim ja vai estar disponivel o banco de dados para operação e você tambem ja pode se conectar ao banco com as info do ".env".
 
-A API usa o json para sua comunicação, sendo assim nas rotas:
+A API usa o json para sua comunicação, sendo assim as rotas:
 
 - /register:  metodo utilizado será o **POST**. É necessario  enviar no corpo da solicitação o "name", "email", "password" e "confirm_password".
 
