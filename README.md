@@ -12,7 +12,7 @@ Esta é um API REST simples para registro de usuários e gerenciamento de tarefa
 
 - werkzeug.security: uma biblioteca usada para hashing e verificação de senhas.
 
-Para instalar as depenencias você pode usar o comendo "pip install -r requirements.txt".
+Para instalar as depenencias você pode usar o comando "pip install -r requirements.txt".
 
 ## Como usar :
 
