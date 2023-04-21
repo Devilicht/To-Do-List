@@ -4,7 +4,7 @@ from os import getenv
 
 class UserRepository:
     def __init__(self):
-        
+
         conn = psycopg2.connect(
             host='localhost',
             port=5432,
@@ -16,17 +16,34 @@ class UserRepository:
         self.conn = conn
         self.db = cur
 
+    def create_table(self):
+        self.db.execute('CREATE TABLE IF NOT EXISTS users \
+        (user_id SERIAL PRIMARY KEY, name VARCHAR(150) NOT NULL, \
+        email VARCHAR(150) UNIQUE NOT NULL, \
+        password VARCHAR(150) NOT NULL);')
+
+        self.db.execute('CREATE TABLE IF NOT EXISTS tasks \
+        (task_id SERIAL PRIMARY KEY, \
+        title VARCHAR(200) NOT NULL, \
+        description TEXT NULL, \
+        is_done BOOLEAN DEFAULT false, \
+        user_id INTEGER REFERENCES users(user_id));')
+
+
     def findUserByEmail(self, email: str) -> (tuple | None):
         self.db.execute(
             'SELECT user_id, password FROM users WHERE email=%s', (email,))
         result = self.db.fetchone()
         self.conn.commit()
         return result
-
     def saveUser(self, name: str, email: str, hashed_password: str) -> None:
-        self.db.execute(
-            'INSERT INTO users (name,email, password) VALUES (%s,%s,%s)', (name, email, hashed_password))
+        self.db.execute('SELECT * FROM users WHERE email=%s', (email,))
+        existing_user = self.db.fetchone()
+        if existing_user:
+            raise ValueError()
+        self.db.execute('INSERT INTO users (name, email, password) VALUES (%s, %s, %s)', (name, email, hashed_password))
         self.conn.commit()
+
 
     def joinUserTask(self, user_id: int):
         self.db.execute(

@@ -46,14 +46,14 @@ O **DELETE** que é usado para excluisão da a task passada no "task_id".
 ## Configuração Database:
 
 Em relação a criação da DB foram criadas duas tabelas:
-- CREATE TABLE users (
+- CREATE TABLE IF NOT EXIST users (
     user_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     password VARCHAR(150) NOT NULL
 );
 
-- CREATE TABLE tasks (
+- CREATE TABLE IF NOT EXIST tasks (
     task_id SERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description TEXT NULL,
