@@ -1,20 +1,12 @@
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      - db
-    container_name: to-do-list_api
-    ports:
-      - 5000:5000
-    env_file:
-      - .env
   db:
     image: postgres
     restart: always
-    container_name: tasks_db
+    container_name: todo_db
     ports:
       - 5432:5432
     env_file:
       - .env
+volumes:
+  postgres-data:
+    driver: local

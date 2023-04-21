@@ -27,16 +27,16 @@ A API permite que os usuários criem uma conta, façam login, criem tarefas, lei
 # Configuração Database:
 Em relação a criação da DB foram criadas duas tabelas:
 - CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    user_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     password VARCHAR(150) NOT NULL
 );
 
 - CREATE TABLE tasks (
-    id SERIAL PRIMARY KEY,
+    task_id SERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description TEXT NULL,
     is_done BOOLEAN DEFAULT false,
-    user_id INTEGER REFERENCES users(id)
+    user_id INTEGER REFERENCES users(user_id)
 );

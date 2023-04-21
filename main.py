@@ -16,7 +16,7 @@ app.config['SECRET_KEY'] = generatorKeyToken()
 key = app.config['SECRET_KEY']
 
 
-@app.route('/users', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def autht():
     email = request.json['email']
     password = request.json['password']
@@ -61,7 +61,7 @@ def register():
     return jsonify({'message': 'Account added'}), 200
 
 
-@app.route('/users/<user_id>/tasks', methods=['GET'])
+@app.route('/login/<user_id>/tasks', methods=['GET'])
 def readTasks(user_id):
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token, key)
@@ -79,7 +79,7 @@ def readTasks(user_id):
         return jsonify({"message": "no registered tasks"}), 401
 
 
-@app.route('/users/<user_id>/tasks', methods=['POST'])
+@app.route('/login/<user_id>/tasks', methods=['POST'])
 def createTask(user_id):
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token, key)
@@ -99,7 +99,7 @@ def createTask(user_id):
         return jsonify({'message': 'error creating task'}), 401
 
 
-@app.route('/users/<user_id>/tasks/<task_id>', methods=['PUT'])
+@app.route('/login/<user_id>/tasks/<task_id>', methods=['PUT'])
 def updateTitleAndDescription(user_id, task_id):
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token, key)
@@ -121,7 +121,7 @@ def updateTitleAndDescription(user_id, task_id):
     return jsonify({'message': 'Task updated'})
 
 
-@app.route('/users/<user_id>/tasks/<task_id>', methods=['DELETE'])
+@app.route('/login/<user_id>/tasks/<task_id>', methods=['DELETE'])
 def delete_task(user_id, task_id):
     token = request.headers.get('Authorization')
     decoded_token = decode_token(token, key)
@@ -139,4 +139,4 @@ def delete_task(user_id, task_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=5900)
