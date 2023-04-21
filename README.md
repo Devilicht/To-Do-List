@@ -14,6 +14,15 @@ Esta é um API REST simples para registro de usuários e gerenciamento de tarefa
 
 Para instalar as depenencias você pode usar o comando "pip install -r requirements.txt".
 
+## Objetivos dos arquivos:
+- authentication.py: usa o JWT para gerar e decodificar o token.
+
+- repository.py: tem uma classe que recebe parametros de conexão com o banco de dados e tem modulos que realizam consultas necessarias para a funcionalidade da aplicação.
+
+- randomToken.py: tem uma função que cria palavras aleatorias que vão ser usadas como parametro de criação do token, assim os tokens irão ser exclusivos.
+
+- main.py: recebe as funcionalidades dos arquivos acima e cria as rotas da API contendo a logica de cada uma.
+
 ## Como usar :
 
 Será criar um arquivo ".env" e definir as variaveis, em seguida "subir" o conteiner no docker, assim ja vai estar disponivel o banco de dados para operação e você tambem ja pode se conectar ao banco com as info do ".env".
