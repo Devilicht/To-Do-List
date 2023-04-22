@@ -12,7 +12,7 @@ Esta é um API REST simples para registro de usuários e gerenciamento de tarefa
 
 - werkzeug.security: uma biblioteca usada para hashing e verificação de senhas.
 
-Para instalar as depenencias você pode usar o comando "pip install -r requirements.txt".
+Para instalar as depenencias você pode usar o comando `pip install -r requirements.txt`.
 
 ## Objetivos dos arquivos:
 - authentication.py: usa o JWT para gerar e decodificar o token.
@@ -25,7 +25,7 @@ Para instalar as depenencias você pode usar o comando "pip install -r requireme
 
 ## Como usar :
 
-Será criar um arquivo ".env" e definir as variaveis, em seguida "subir" o conteiner no docker, assim ja vai estar disponivel o banco de dados para operação e você tambem ja pode se conectar ao banco com as info do ".env".
+Será necessário criar um arquivo ".env" e definir as variaveis, em seguida "subir" o conteiner no docker, assim ja vai estar disponivel o banco de dados para operação e você tambem ja pode se conectar ao banco com as info do ".env".
 
 A API usa o json para sua comunicação, sendo assim as rotas:
 
@@ -46,17 +46,20 @@ O **DELETE** que é usado para excluisão da a task passada no "task_id".
 ## Configuração Database:
 
 Em relação a criação da DB foram criadas duas tabelas:
-- CREATE TABLE IF NOT EXIST users (
+```sql
+CREATE TABLE IF NOT EXIST users (
     user_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     password VARCHAR(150) NOT NULL
 );
-
-- CREATE TABLE IF NOT EXIST tasks (
+```
+```sql
+CREATE TABLE IF NOT EXIST tasks (
     task_id SERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description TEXT NULL,
     is_done BOOLEAN DEFAULT false,
     user_id INTEGER REFERENCES users(user_id)
 );
+```
