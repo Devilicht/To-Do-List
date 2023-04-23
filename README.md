@@ -47,7 +47,7 @@ O **DELETE** que é usado para excluisão da a task passada no "task_id".
 
 Em relação a criação da DB foram criadas duas tabelas:
 ```sql
-CREATE TABLE IF NOT EXIST users (
+CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXIST users (
 );
 ```
 ```sql
-CREATE TABLE IF NOT EXIST tasks (
+CREATE TABLE EXIST tasks (
     task_id SERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description TEXT NULL,
