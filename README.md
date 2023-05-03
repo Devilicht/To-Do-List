@@ -55,7 +55,7 @@ CREATE TABLE users (
 );
 ```
 ```sql
-CREATE TABLE EXIST tasks (
+CREATE TABLE tasks (
     task_id SERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description TEXT NULL,
